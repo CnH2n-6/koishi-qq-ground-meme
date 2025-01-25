@@ -15,8 +15,12 @@
     "koishi",
     "plugin"
   ],
-  "devDependencies": {},
   "peerDependencies": {
     "koishi": "^4.17.7"
+  },
+  "dependencies": {
+    "@types/ali-oss": "^6.16.11",
+    "ali-oss": "^6.22.0",
+    "axios": "^1.7.9"
   }
 }
