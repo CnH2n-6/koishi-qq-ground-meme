@@ -8,6 +8,7 @@ import { createConnect } from './connect'
 export class Api {
   private client: OSS
   private prefix = 'group-friends-meme'
+  private memeRecord = {}
 
   constructor(private config: Config) {
     this.client = createConnect(config)
@@ -39,6 +40,7 @@ export class Api {
     }
   }
 
+  // 防重复
   async getGroundMeme(groundId) {
     try {
       const ossPath = `${this.prefix}/${groundId}/`
@@ -52,9 +54,36 @@ export class Api {
       if(memeList.length === 0) {
         return null
       }
+      
+      if(!this.memeRecord[groundId]) {
+        this.memeRecord[groundId] = {
+          cd: Date.now(),
+          hadSend: []
+        }
+      }
+      
 
-      const randomIndex = Math.floor(Math.random() * memeList.length)
+      const record = this.memeRecord[groundId]
+      
+      let randomIndex = Math.floor(Math.random() * memeList.length)
+      
+      const maxTime = 30
+      let time = 0
+      while(record.hadSend.includes(randomIndex) && time <= maxTime) {
+        randomIndex = Math.floor(Math.random() * memeList.length)
+        time += 1
+      }
+      time = 0
+      record.hadSend.push(randomIndex)
+      
+      const cd = 2 * 60 * 1000
+
+      if((Date.now() - record.cd > cd) || record.hadSend.length >= memeList.length) {
+        record.hadSend = []
+      } 
+      
       const targetMeme = memeList[randomIndex]
+
       return targetMeme.url
     } catch(error) {
       console.log('获取oss图片失败:', error)
